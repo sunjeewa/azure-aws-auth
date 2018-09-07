@@ -12,6 +12,19 @@
           <p>If you have questions, please join the official <a href="https://chat.vuetifyjs.com/" target="_blank" title="chat">discord</a>.</p>
           <p>Find a bug? Report it on the github <a href="https://github.com/vuetifyjs/vuetify/issues" target="_blank" title="contribute">issue board</a>.</p>
           <p>Thank you for developing with Vuetify and I look forward to bringing more exciting features in the future.</p>
+            <div>
+
+        <div v-if="$store.state.auth">
+          <p>You are authenticated. You can see the
+            <nuxt-link to="/secret">secret page</nuxt-link>!
+          </p>
+          <button @click="logout">Logout</button>
+        </div>
+        <p v-else>Please
+          <nuxt-link to="/login">login</nuxt-link>.
+        </p>
+      </div>
+
           <div class="text-xs-right">
             <em><small>&mdash; John Leider</small></em>
           </div>
@@ -28,3 +41,17 @@
     </v-flex>
   </v-layout>
 </template>
+
+<script>
+const Cookie = process.browser ? require('js-cookie') : undefined
+
+export default {
+  middleware: 'authenticated',
+  methods: {
+    logout () {
+      Cookie.remove('auth')
+      this.$store.commit('setAuth', null)
+    }
+  }
+}
+</script>

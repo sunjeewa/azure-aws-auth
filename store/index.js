@@ -1,9 +1,34 @@
-export const state = () => ({
-  sidebar: false
-})
+import Vuex from 'vuex'
+const cookieparser = process.server ? require('cookieparser') : undefined
 
-export const mutations = {
-  toggleSidebar (state) {
-    state.sidebar = !state.sidebar
-  }
+const createStore = () => {
+  return new Vuex.Store({
+    state: {
+      auth: null,
+      sidebar: false
+    },
+    mutations: {
+      setAuth (state, auth) {
+        state.auth = auth
+        console.log('Updating auth')
+        console.log(auth)
+      }
+    },
+    actions: {
+      nuxtServerInit ({ commit }, { req }) {
+        let auth = null
+        if (req.headers.cookie) {
+          const parsed = cookieparser.parse(req.headers.cookie)
+          try {
+            auth = JSON.parse(parsed.auth)
+          } catch (err) {
+            // No valid cookie found
+          }
+        }
+        commit('setAuth', auth)
+      }
+    }
+  })
 }
+
+export default createStore
