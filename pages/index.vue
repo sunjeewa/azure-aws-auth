@@ -7,12 +7,6 @@
       <v-card>
         <v-card-title class="headline">Welcome to the Vuetify + Nuxt.js template</v-card-title>
         <v-card-text>
-          <p>Vuetify is a progressive Material Design component framework for Vue.js. It was designed to empower developers to create amazing applications.</p>
-          <p>For more information on Vuetify, check out the <a href="https://vuetifyjs.com" target="_blank">documentation</a>.</p>
-          <p>If you have questions, please join the official <a href="https://chat.vuetifyjs.com/" target="_blank" title="chat">discord</a>.</p>
-          <p>Find a bug? Report it on the github <a href="https://github.com/vuetifyjs/vuetify/issues" target="_blank" title="contribute">issue board</a>.</p>
-          <p>Thank you for developing with Vuetify and I look forward to bringing more exciting features in the future.</p>
-            <div>
 
         <div v-if="$store.state.auth">
           <p>You are authenticated. You can see the
@@ -25,8 +19,24 @@
         </p>
       </div>
 
+
+    <code>{{ user }}</code>
+    <button @click="login" type="button" v-if="!user">Login with Microsoft</button>
+    <button @click="callAPI" type="button" v-if="user">
+      Call Graph's /me API
+    </button>
+    <button @click="logout" type="button" v-if="user">
+      Logout
+    </button>
+    <h3 v-if="user">Hello {{ user.name }}</h3>
+    <pre v-if="userInfo">{{ JSON.stringify(userInfo, null, 4) }}</pre>
+    <p v-if="loginFailed">Login unsuccessful</p>
+    <p v-if="apiCallFailed">Graph API call unsuccessful</p>
+
+
+
           <div class="text-xs-right">
-            <em><small>&mdash; John Leider</small></em>
+            <em><small>&mdash John Leider</small></em>
           </div>
           <hr class="my-3">
           <a href="https://nuxtjs.org/" target="_blank">Nuxt Documentation</a>
@@ -43,14 +53,63 @@
 </template>
 
 <script>
-const Cookie = process.browser ? require('js-cookie') : undefined
+import GraphService from '~/modules/graph.service'
+import AuthService from '~/modules/auth.service'
 
 export default {
   middleware: 'authenticated',
+  name: 'app',
+  data () {
+    return {
+      msg: 'Welcome to Your Vue.js + MSAL.js App',
+      user: null,
+      userInfo: null,
+      apiCallFailed: false,
+      loginFailed: false
+    }
+  },
+  mounted () {
+    this.authService = new AuthService()
+    this.graphService = new GraphService()
+  },
   methods: {
+    callAPI () {
+      this.apiCallFailed = false
+      this.authService.getToken().then(
+        token => {
+          this.graphService.getUserInfo(token).then(
+            data => {
+              this.userInfo = data
+            },
+            error => {
+              console.error(error)
+              this.apiCallFailed = true
+            }
+          )
+        },
+        error => {
+          console.error(error)
+          this.apiCallFailed = true
+        }
+      )
+    },
     logout () {
-      Cookie.remove('auth')
-      this.$store.commit('setAuth', null)
+      this.authService.logout()
+    },
+    login () {
+      this.loginFailed = false
+      this.authService.login().then(
+        user => {
+          if (user) {
+            this.user = user
+          } else {
+            this.loginFailed = true
+          }
+        },
+        () => {
+          this.loginFailed = true
+        }
+      )
     }
   }
 }
