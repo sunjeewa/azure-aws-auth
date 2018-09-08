@@ -9,13 +9,12 @@
               </v-toolbar>
               <v-card-text>
                 <v-form>
-                  <v-text-field prepend-icon="person" name="login" label="Login" type="text"></v-text-field>
-                  <v-text-field id="password" prepend-icon="lock" name="password" label="Password" type="password"></v-text-field>
+                  <span> Login with AuzreAD </span>
                 </v-form>
               </v-card-text>
               <v-card-actions>
                 <v-spacer></v-spacer>
-                <v-btn @click="postLogin" color="primary">Login</v-btn>
+                <v-btn @click="login" color="primary">Login with Microsoft</v-btn>
               </v-card-actions>
        </v-card>
     </v-flex>
@@ -23,22 +22,31 @@
 </template>
 
 <script>
-const Cookie = process.browser ? require('js-cookie') : undefined
 
+import AuthService from '~/modules/auth.service'
 export default {
   layout: 'auth',
   middleware: 'notAuthenticated',
+  mounted () {
+    this.authService = new AuthService()
+  },
   methods: {
-    postLogin () {
-      setTimeout(() => {
-        // we simulate the async request with timeout.
-        const auth = {
-          accessToken: 'someStringGotFromApiServiceWithAjax'
+    login () {
+      this.loginFailed = false
+      this.authService.login().then(
+        user => {
+          if (user) {
+            this.user = user
+            this.$store.commit('setAuth', user)
+            this.$router.push('/')
+          } else {
+            this.loginFailed = true
+          }
+        },
+        () => {
+          this.loginFailed = true
         }
-        this.$store.commit('setAuth', auth) // mutating to store for client rendering
-        Cookie.set('auth', auth) // saving token in cookie for server rendering
-        this.$router.push('/')
-      }, 1000)
+      )
     }
   }
 }

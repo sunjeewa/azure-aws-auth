@@ -14,4 +14,16 @@ export default class GraphService {
         throw new Error(response.text())
       })
   };
+
+  getAllUsers (token) {
+    const headers = new Headers({ Authorization: `Bearer ${token}` })
+    const options = {
+      headers
+    }
+    return fetch(`${this.graphUrl}/users`, options)
+      .then(response => response.json())
+      .catch(response => {
+        throw new Error(response.text())
+      })
+  };
 }

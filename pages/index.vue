@@ -1,43 +1,26 @@
 <template>
   <v-layout column justify-center align-center>
     <v-flex xs12 sm8 md6>
-      <div class="text-xs-center">
-        <img src="/v.png" alt="Vuetify.js" class="mb-5" />
-      </div>
       <v-card>
-        <v-card-title class="headline">Welcome to the Vuetify + Nuxt.js template</v-card-title>
+        <v-card-title class="headline">Welcome {{ $store.state.user.name }}</v-card-title>
         <v-card-text>
 
-        <div v-if="$store.state.auth">
-          <p>You are authenticated. You can see the
-            <nuxt-link to="/secret">secret page</nuxt-link>!
-          </p>
-          <button @click="logout">Logout</button>
-        </div>
-        <p v-else>Please
-          <nuxt-link to="/login">login</nuxt-link>.
-        </p>
-      </div>
-
-
-    <code>{{ user }}</code>
-    <button @click="login" type="button" v-if="!user">Login with Microsoft</button>
-    <button @click="callAPI" type="button" v-if="user">
+        
+    <button @click="callAPIusers" type="button" v-if="$store.state.user">
       Call Graph's /me API
     </button>
+
     <button @click="logout" type="button" v-if="user">
       Logout
     </button>
-    <h3 v-if="user">Hello {{ user.name }}</h3>
+    <h3 v-if="$store.state.user">Hello {{ $store.state.user }}</h3>
     <pre v-if="userInfo">{{ JSON.stringify(userInfo, null, 4) }}</pre>
+    <pre v-if="allUserInfo">{{ JSON.stringify(allUserInfo, null, 4) }}</pre>
     <p v-if="loginFailed">Login unsuccessful</p>
     <p v-if="apiCallFailed">Graph API call unsuccessful</p>
 
 
 
-          <div class="text-xs-right">
-            <em><small>&mdash John Leider</small></em>
-          </div>
           <hr class="my-3">
           <a href="https://nuxtjs.org/" target="_blank">Nuxt Documentation</a>
           <br>
@@ -62,8 +45,8 @@ export default {
   data () {
     return {
       msg: 'Welcome to Your Vue.js + MSAL.js App',
-      user: null,
       userInfo: null,
+      allUserInfo: null,
       apiCallFailed: false,
       loginFailed: false
     }
@@ -80,6 +63,26 @@ export default {
           this.graphService.getUserInfo(token).then(
             data => {
               this.userInfo = data
+            },
+            error => {
+              console.error(error)
+              this.apiCallFailed = true
+            }
+          )
+        },
+        error => {
+          console.error(error)
+          this.apiCallFailed = true
+        }
+      )
+    },
+    callAPIusers () {
+      this.apiCallFailed = false
+      this.authService.getToken().then(
+        token => {
+          this.graphService.getAllUsers(token).then(
+            data => {
+              this.allUserInfo = data
             },
             error => {
               console.error(error)

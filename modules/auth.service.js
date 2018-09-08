@@ -5,7 +5,7 @@ export default class AuthService {
     let PROD_REDIRECT_URI = 'http://localhost:3000/'
     this.applicationConfig = {
       clientID: '6c7baa2d-91d7-47c2-9ab7-8b9366f98afb',
-      graphScopes: ['user.read']
+      graphScopes: ['user.read.all']
     }
     this.app = new Msal.UserAgentApplication(
       this.applicationConfig.clientID,

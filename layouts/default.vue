@@ -1,5 +1,5 @@
 <template>
-  <v-app>
+  <v-app color="info"> 
     <v-navigation-drawer
       :mini-variant.sync="miniVariant"
       :clipped="clipped"
@@ -28,6 +28,7 @@
       <v-toolbar-side-icon @click="drawer = !drawer"></v-toolbar-side-icon>
       <v-toolbar-title v-text="title"></v-toolbar-title>
       <v-spacer></v-spacer>
+      <v-btn v-if="$store.state.user" flat>{{$store.state.user.name}}</v-btn>
     </v-toolbar>
     <v-content>
       <v-container>
